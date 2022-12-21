@@ -1,0 +1,26 @@
+{
+  "name": "ipmp-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArtemPavliukovich/discord_ipmp-bot.git"
+  },
+  "author": "Artsiom Pauliukovich",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ArtemPavliukovich/discord_ipmp-bot/issues"
+  },
+  "homepage": "https://github.com/ArtemPavliukovich/discord_ipmp-bot#readme",
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.30.0"
+  }
+}
