@@ -3,8 +3,10 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('hello')
-		.setDescription('Replies with Pong!'),
+		.setDescription('Поприветствовать IPMP-Bot'),
 	async execute(interaction) {
-		await interaction.reply('Hello, I am bot');
+		await interaction.reply(
+			`Привет ${interaction.user.username}, меня зовут IPMP-Bot, рад знакомству`,
+		);
 	},
 };
