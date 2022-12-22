@@ -1,12 +1,14 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { commands } = require('../config.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('hello')
-		.setDescription('Поприветствовать IPMP-Bot'),
+		.setName(commands.hello.name)
+		.setDescription(commands.hello.description),
 	async execute(interaction) {
-		await interaction.reply(
-			`Привет ${interaction.user.username}, меня зовут IPMP-Bot, рад знакомству`,
-		);
+		await interaction.reply({
+			content: commands.hello.message(interaction.user.username),
+			ephemeral: true,
+		});
 	},
 };
