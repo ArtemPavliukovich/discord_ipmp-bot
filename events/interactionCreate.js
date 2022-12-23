@@ -1,5 +1,5 @@
 const { Events } = require('discord.js');
-const { commandsError } = require('../config.js');
+const { messages } = require('../config.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -15,7 +15,7 @@ module.exports = {
 			try {
 				await command.execute(interaction);
 			} catch (error) {
-				await interaction.reply({content: commandsError, ephemeral: true});
+				await interaction.reply({content: messages.commandsError, ephemeral: true});
 			}
 		}
 	},

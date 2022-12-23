@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { commands } = require('../config.js');
+const { commands, messages } = require('../config.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,7 +7,7 @@ module.exports = {
 		.setDescription(commands.hello.description),
 	async execute(interaction) {
 		await interaction.reply({
-			content: commands.hello.message(interaction.user.username),
+			content: messages.hello(interaction.user.username),
 			ephemeral: true,
 		});
 	},

@@ -1,8 +1,3 @@
 module.exports = {
-	schedules: [
-		{
-			name: 'login',
-			link: [],
-		},
-	],
+	schedules: new Map(),
 };
