@@ -1,5 +1,5 @@
 const { Events } = require('discord.js');
-const { idGeneralChannel, welcomeRoles } = require('../config.js');
+const { idGeneralChannel, welcomeRoles, messages } = require('../config.js');
 
 module.exports = {
 	name: Events.GuildMemberUpdate,
@@ -15,7 +15,7 @@ module.exports = {
 				if (welcomeRoles.some(role => role === [...newRole][0][1].name)) {
 					const idNewRole = [...newRole][0][0];
 					const channel = newMember.guild.channels.cache.get(idGeneralChannel);
-					channel.send(`Команду <@&${idNewRole}> 🙂 поздравляю с пополнением!`);
+					channel.send(messages.congratTeam(idNewRole));
 				}
 			}
 		}

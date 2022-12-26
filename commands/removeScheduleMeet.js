@@ -12,11 +12,12 @@ module.exports = {
 				.setRequired(true),
 		),
 	async execute(interaction) {
-		let response = '';
 		const name = interaction.options.getString(commands.removeScheduleMeet.options.name.name);
+		let response = '';
 
 		if (schedules.has(name)) {
 			schedules.delete(name);
+			// остановить schedule
 			response = messages.removeSchedule;
 		} else {
 			response = messages.notExistMeet;

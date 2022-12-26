@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const cron = require('node-cron');
-const { commands, messages } = require('../config.js');
+const { commands, messages, meets } = require('../config.js');
 const { schedules } = require('../schedules');
 
 module.exports = {
@@ -11,10 +11,18 @@ module.exports = {
 			option.setName(commands.addScheduleMeet.options.name.name)
 				.setDescription(commands.addScheduleMeet.options.name.description)
 				.setRequired(true)
-				.setMaxLength(20),
-		),
+				.setMaxLength(20))
+		.addStringOption(option =>
+			option.setName(commands.addScheduleMeet.options.type.name)
+				.setDescription(commands.addScheduleMeet.options.type.description)
+				.setRequired(true)
+				.addChoices(
+					{name: typesMeet.once, value: typesMeet.once},
+					{name: typesMeet.repeated, value: typesMeet.repeated},
+				)),
 	async execute(interaction) {
 		const name = interaction.options.getString(commands.addScheduleMeet.options.name.name);
+		const type = interaction.options.getString(commands.addScheduleMeet.options.type.name);
 		const schedule = null;
 		//const timer = cron.schedule()
 		schedules.set(name, schedule);
