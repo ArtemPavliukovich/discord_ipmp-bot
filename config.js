@@ -20,9 +20,27 @@ module.exports = {
 					name: 'name',
 					description: 'Введите название планируемой встречи',
 				},
-				type: {
-					name: 'type',
-					description: 'Выберите тип встречи',
+				month: {
+					name: 'month',
+					description: 'Выберите месяц',
+				},
+				date: {
+					name: 'date',
+					description: 'Укажите дату',
+				},
+				users: {
+					name: 'users',
+					description: 'Отметьте людей которые должны присутствовать на встрече',
+				},
+			},
+			subcommand: {
+				onceMeet: {
+					name: 'once-meet',
+					description: 'Запланировать разовую встречу',
+				},
+				repeatMeet: {
+					name: 'repeat-meet',
+					description: 'Запланировать повторяющуюся встречу',
 				},
 			},
 		},
@@ -32,7 +50,7 @@ module.exports = {
 			options: {
 				name: {
 					name: 'name',
-					description: 'Выберите название отменяемой встречи',
+					description: 'Введите название отменяемой встречи',
 				},
 			},
 		},
@@ -49,20 +67,28 @@ module.exports = {
 		addUser: (idUser) => `<@${idUser}> приветствую! У нас тут песочница, но всё по-взрослому, вливайся!`,
 	},
 
-	meets: {
-		types: {
-			once: {
-				name: 'a one-time meeting',
-				value: 'once',
-			},
-			repeated: {
-				name: 'a recurring meeting',
-				value: 'repeated',
-			},
-		},
-		days: {
-			monday: 'Monday',
+	days: {
+		monday: 'Monday',
+		tuesday: 'Tuesday',
+		wednesday: 'Wednesday',
+		thursday: 'Thursday',
+		friday: 'Friday',
+		saturday: 'Saturday',
+		sunday: 'Sunday',
+	},
 
-		},
+	months: {
+		january: 'January',
+		february: 'February',
+		march: 'March',
+		april: 'April',
+		may: 'May',
+		june: 'June',
+		july: 'July',
+		august: 'August',
+		september: 'September',
+		october: 'October',
+		november: 'November',
+		december: 'December',
 	},
 };

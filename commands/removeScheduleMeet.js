@@ -9,15 +9,17 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName(commands.removeScheduleMeet.options.name.name)
 				.setDescription(commands.removeScheduleMeet.options.name.description)
-				.setRequired(true),
+				.setRequired(true)
+				.setMaxLength(20),
 		),
 	async execute(interaction) {
 		const name = interaction.options.getString(commands.removeScheduleMeet.options.name.name);
 		let response = '';
 
 		if (schedules.has(name)) {
+			const task = schedules.get(name);
+			task.stop();
 			schedules.delete(name);
-			// остановить schedule
 			response = messages.removeSchedule;
 		} else {
 			response = messages.notExistMeet;

@@ -8,6 +8,8 @@ const client = new Client({intents: [
 	GatewayIntentBits.GuildMembers,
 ]});
 
+module.exports = { client };
+
 client.commands = new Collection();
 
 const commandsFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
