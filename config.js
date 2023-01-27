@@ -28,9 +28,25 @@ module.exports = {
 					name: 'date',
 					description: 'Укажите дату',
 				},
+				day: {
+					name: 'day',
+					description: 'Выберите день в который планируется встреча',
+				},
+				hour: {
+					name: 'hour',
+					description: 'Укажите в котором часу планируется встреча',
+				},
+				minute: {
+					name: 'minute',
+					description: 'Укажите минуту на которой планируется встреча',
+				},
 				users: {
 					name: 'users',
 					description: 'Отметьте людей которые должны присутствовать на встрече',
+				},
+				roles: {
+					name: 'roles',
+					description: 'Укажите "Роли" которые должны присутствовать на встрече',
 				},
 			},
 			subcommand: {
