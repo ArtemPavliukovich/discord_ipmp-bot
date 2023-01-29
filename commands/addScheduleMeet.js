@@ -1,8 +1,15 @@
 const { SlashCommandBuilder } = require('discord.js');
 const cron = require('node-cron');
-const { commands, messages, months } = require('../config.js');
+const { commands, messages, months, days } = require('../config.js');
 const { schedules } = require('../schedules');
 const { client } = require('../index');
+const Task = require('../libs/classes/task');
+
+const removeTask = (nameTask) => { // delete from database
+	const task = schedules.get(nameTask);
+	task.stop();
+	schedules.delete(nameTask);
+};
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -52,12 +59,10 @@ module.exports = {
 						.setRequired(true)
 						.setMinValue(0)
 						.setMaxValue(59))
-				.addRoleOption(option =>
-					option.setName(commands.addScheduleMeet.options.roles.name)
-						.setDescription(commands.addScheduleMeet.options.roles.description))
-				.addUserOption(option =>
+				.addStringOption(option =>
 					option.setName(commands.addScheduleMeet.options.users.name)
-						.setDescription(commands.addScheduleMeet.options.users.description)),
+						.setDescription(commands.addScheduleMeet.options.users.description)
+						.setRequired(true)),
 		)
 		.addSubcommand(subcommand =>
 			subcommand.setName(commands.addScheduleMeet.subcommand.repeatMeet.name)
@@ -66,39 +71,70 @@ module.exports = {
 					option.setName(commands.addScheduleMeet.options.name.name)
 						.setDescription(commands.addScheduleMeet.options.name.description)
 						.setRequired(true)
-						.setMaxLength(20)),
+						.setMaxLength(20))
+				.addStringOption(option =>
+					option.setName(commands.addScheduleMeet.options.day.name)
+						.setDescription(commands.addScheduleMeet.options.day.description)
+						.setRequired(true)
+						.addChoices(
+							{name: days.monday, value: days.monday.toLowerCase()},
+							{name: days.tuesday, value: days.tuesday.toLowerCase()},
+							{name: days.wednesday, value: days.wednesday.toLowerCase()},
+							{name: days.thursday, value: days.thursday.toLowerCase()},
+							{name: days.friday, value: days.friday.toLowerCase()},
+							{name: days.saturday, value: days.saturday.toLowerCase()},
+							{name: days.sunday, value: days.sunday.toLowerCase()},
+						))
+				.addIntegerOption(option =>
+					option.setName(commands.addScheduleMeet.options.hour.name)
+						.setDescription(commands.addScheduleMeet.options.hour.description)
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(23))
+				.addIntegerOption(option =>
+					option.setName(commands.addScheduleMeet.options.minute.name)
+						.setDescription(commands.addScheduleMeet.options.minute.description)
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(59))
+				.addStringOption(option =>
+					option.setName(commands.addScheduleMeet.options.users.name)
+						.setDescription(commands.addScheduleMeet.options.users.description)
+						.setRequired(true)),
 		),
 	async execute(interaction) {
-		let task;
+		let taskSchedule;
+		let responseMessage;
 		const name = interaction.options.getString(commands.addScheduleMeet.options.name.name);
 		const month = interaction.options.getString(commands.addScheduleMeet.options.month.name);
 		const date = interaction.options.getInteger(commands.addScheduleMeet.options.date.name);
+		const day = interaction.options.getString(commands.addScheduleMeet.options.day.name);
 		const hour = interaction.options.getInteger(commands.addScheduleMeet.options.hour.name);
 		const minute = interaction.options.getInteger(commands.addScheduleMeet.options.minute.name);
-		const users = interaction.options.getUser(commands.addScheduleMeet.options.users.name);
-		const roles = interaction.options.getRole(commands.addScheduleMeet.options.roles.name);
-		console.log(date);
-		console.log(hour);
-		console.log(minute);
-		console.log(users);
-		console.log(roles);
-		// console.log(interaction);
-		if (month) {
-			task = cron.schedule('* * * * *', () => {
-				const channel = client.channels.cache.get(interaction.channelId);
-				channel.send('привет');
-				task.stop();
-				schedules.delete(name);
-			}, {scheduled: false});
+		const users = interaction.options.getString(commands.addScheduleMeet.options.users.name);
+
+		if (!schedules.has(name)) {
+			const task = new Task(name, month, day, date, hour, minute, users);
+
+			if (task.isRepeatedMeet) {
+				console.log('in develop');
+			} else {
+				taskSchedule = cron.schedule('* * * * *', () => {
+					const channel = client.channels.cache.get(interaction.channelId);
+					channel.send('привет');
+					setTimeout(() => removeTask(name), 0);
+				}, {scheduled: false});
+			}
+
+			taskSchedule.start();
+			schedules.set(name, taskSchedule);
+			responseMessage = messages.addSchedule;
 		} else {
-			console.log('in develop');
+			responseMessage = messages.meetIsPlanning;
 		}
 
-		task.start();
-		schedules.set(name, task);
-
 		await interaction.reply({
-			content: messages.addSchedule,
+			content: responseMessage,
 			ephemeral: true,
 		});
 	},
