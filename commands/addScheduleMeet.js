@@ -1,15 +1,14 @@
 const { SlashCommandBuilder } = require('discord.js');
-const cron = require('node-cron');
 const { commands, messages, months, days } = require('../config.js');
 const { schedules } = require('../schedules');
 const { client } = require('../index');
 const Task = require('../libs/classes/task');
 
-const removeTask = (nameTask) => { // delete from database
+/* const removeTask = (nameTask) => {
 	const task = schedules.get(nameTask);
 	task.stop();
 	schedules.delete(nameTask);
-};
+}; */
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -103,34 +102,33 @@ module.exports = {
 						.setRequired(true)),
 		),
 	async execute(interaction) {
-		let taskSchedule;
 		let responseMessage;
 		const name = interaction.options.getString(commands.addScheduleMeet.options.name.name);
+		const users = interaction.options.getString(commands.addScheduleMeet.options.users.name);
 		const month = interaction.options.getString(commands.addScheduleMeet.options.month.name);
-		const date = interaction.options.getInteger(commands.addScheduleMeet.options.date.name);
 		const day = interaction.options.getString(commands.addScheduleMeet.options.day.name);
+		const date = interaction.options.getInteger(commands.addScheduleMeet.options.date.name);
 		const hour = interaction.options.getInteger(commands.addScheduleMeet.options.hour.name);
 		const minute = interaction.options.getInteger(commands.addScheduleMeet.options.minute.name);
-		const users = interaction.options.getString(commands.addScheduleMeet.options.users.name);
+		const task = new Task(name, month, day, date, hour, minute, users);
 
-		if (!schedules.has(name)) {
-			const task = new Task(name, month, day, date, hour, minute, users);
+		if (true) {
+			const channel = client.channels.cache.get(interaction.channelId);
 
-			if (task.isRepeatedMeet) {
-				console.log('in develop');
-			} else {
-				taskSchedule = cron.schedule('* * * * *', () => {
-					const channel = client.channels.cache.get(interaction.channelId);
-					channel.send('привет');
-					setTimeout(() => removeTask(name), 0);
-				}, {scheduled: false});
-			}
-
+			const taskSchedule = task.getTaskSchedule(() => {
+				if (task.users) {
+					task.users.forEach(user => client.users.send(interaction.user.id, 'привет'));
+					// task.users.forEach(user => client.users.send(user.search(/\d+/g), 'привет'));
+				}
+			});
+			// console.log(interaction);
+			// добавление в базу
 			taskSchedule.start();
-			schedules.set(name, taskSchedule);
+			// schedules.set(task.id, taskSchedule);
+			channel.send(messages.plannedMeet(interaction.user.id, task.name, task.users, task.roles, task.getDate()));
 			responseMessage = messages.addSchedule;
 		} else {
-			responseMessage = messages.meetIsPlanning;
+			responseMessage = messages.notDate;
 		}
 
 		await interaction.reply({

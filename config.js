@@ -3,6 +3,10 @@ module.exports = {
 
 	welcomeRoles: ['Front-end'],
 
+	minutesForWarnAboutMeet: 15,
+
+	timeZone: 'Europe/Minsk',
+
 	commands: {
 		hello: {
 			name: 'hello',
@@ -74,10 +78,15 @@ module.exports = {
 		removeSchedule: 'Встреча успешно отменена',
 		notMeets: 'Нет запланированных встреч',
 		notExistMeet: 'Такой встречи не существует',
+		notDate: 'В указаном месяце, выбранной даты не существует',
 		hello: (username) => `Привет ${username}, меня зовут IPMP-Bot, рад знакомству!`,
 		congratTeam: (idRole) => `Команду <@&${idRole}> 🙂 поздравляю с пополнением!`,
 		addUser: (idUser) => `<@${idUser}> приветствую! У нас тут песочница, но всё по-взрослому, вливайся!`,
-		meetIsPlanning: 'Встреча с таким именем уже существует, пожалуйста измените имя планируемой встречи',
+		plannedMeet: (userId, name, users, roles, date) => {
+			const usersList = users ? ' ' + users.join(' ') : '';
+			const rolesList = roles ? ' ' + roles.join(' ') : '';
+			return `<@${userId}> запланировал/ла встречу "${name}", для${usersList}${rolesList}, дата: ${date}.`;
+		},
 	},
 
 	days: {
@@ -88,6 +97,16 @@ module.exports = {
 		friday: 'Friday',
 		saturday: 'Saturday',
 		sunday: 'Sunday',
+	},
+
+	translateDays: {
+		monday: 'понедельникам',
+		tuesday: 'вторникам',
+		wednesday: 'средам',
+		thursday: 'четвергам',
+		friday: 'пятницам',
+		saturday: 'субботам',
+		sunday: 'воскресеньям',
 	},
 
 	months: {
