@@ -1,14 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { commands, messages, months, days } = require('../config.js');
-const { schedules } = require('../schedules');
 const { client } = require('../index');
+const { tasks } = require('../tasks');
 const Task = require('../libs/classes/task');
-
-/* const removeTask = (nameTask) => {
-	const task = schedules.get(nameTask);
-	task.stop();
-	schedules.delete(nameTask);
-}; */
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,6 +15,7 @@ module.exports = {
 					option.setName(commands.addScheduleMeet.options.name.name)
 						.setDescription(commands.addScheduleMeet.options.name.description)
 						.setRequired(true)
+						.setMinLength(2)
 						.setMaxLength(20))
 				.addStringOption(option =>
 					option.setName(commands.addScheduleMeet.options.month.name)
@@ -70,6 +65,7 @@ module.exports = {
 					option.setName(commands.addScheduleMeet.options.name.name)
 						.setDescription(commands.addScheduleMeet.options.name.description)
 						.setRequired(true)
+						.setMinLength(2)
 						.setMaxLength(20))
 				.addStringOption(option =>
 					option.setName(commands.addScheduleMeet.options.day.name)
@@ -110,22 +106,30 @@ module.exports = {
 		const date = interaction.options.getInteger(commands.addScheduleMeet.options.date.name);
 		const hour = interaction.options.getInteger(commands.addScheduleMeet.options.hour.name);
 		const minute = interaction.options.getInteger(commands.addScheduleMeet.options.minute.name);
-		const task = new Task(name, month, day, date, hour, minute, users);
 
-		if (true) {
+		const task = new Task(
+			name,
+			month,
+			day,
+			date,
+			hour,
+			minute,
+			users,
+			interaction.channelId,
+			interaction.guildId,
+		);
+		console.log(task.checkDateInMonth()); // test
+		if (task.checkDateInMonth()) {
 			const channel = client.channels.cache.get(interaction.channelId);
-
-			const taskSchedule = task.getTaskSchedule(() => {
-				if (task.users) {
-					task.users.forEach(user => client.users.send(interaction.user.id, 'привет'));
-					// task.users.forEach(user => client.users.send(user.search(/\d+/g), 'привет'));
-				}
-			});
-			// console.log(interaction);
-			// добавление в базу
-			taskSchedule.start();
-			// schedules.set(task.id, taskSchedule);
-			channel.send(messages.plannedMeet(interaction.user.id, task.name, task.users, task.roles, task.getDate()));
+			task.start();
+			tasks.set(task.id, task);
+			channel.send(messages.plannedMeet(
+				interaction.user.id,
+				task.name,
+				task.users,
+				task.roles,
+				task.getStringDate(),
+			));
 			responseMessage = messages.addSchedule;
 		} else {
 			responseMessage = messages.notDate;

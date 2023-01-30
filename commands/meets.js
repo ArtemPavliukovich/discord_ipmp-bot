@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { commands, messages } = require('../config.js');
-const { schedules } = require('../schedules');
+const { tasks } = require('../tasks');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -9,8 +9,8 @@ module.exports = {
 	async execute(interaction) {
 		let response = '';
 
-		if (schedules.size) {
-			for (let name of schedules.keys()) {
+		if (tasks.size) {
+			for (let name of tasks.keys()) {
 				response += `${name} `;
 			}
 		} else {
