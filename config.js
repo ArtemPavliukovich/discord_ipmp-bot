@@ -84,8 +84,10 @@ module.exports = {
 		addUser: (userId) => `<@${userId}> приветствую! У нас тут песочница, но всё по-взрослому, вливайся!`,
 		userMessage: (userId, nameMeet, time) =>
 			`Привет <@${userId}>, напоминаю, у тебя запланирована встреча "${nameMeet}" в ${time}, не опаздывай!`,
-		channelMessage: () => {
-			return 'hello';
+		channelMessage: (name, users, roles, time) => {
+			const usersList = users ? ' ' + users.join(' ') : '';
+			const rolesList = roles ? ' ' + roles.join(' ') : '';
+			return `Напоминаю, у${usersList}${rolesList} состоится встреча "${name}" в ${time}.`;
 		},
 		plannedMeet: (userId, name, users, roles, date) => {
 			const usersList = users ? ' ' + users.join(' ') : '';
@@ -105,13 +107,13 @@ module.exports = {
 	},
 
 	translateDays: {
-		monday: 'понедельникам',
-		tuesday: 'вторникам',
-		wednesday: 'средам',
-		thursday: 'четвергам',
-		friday: 'пятницам',
-		saturday: 'субботам',
-		sunday: 'воскресеньям',
+		monday: 'Понедельникам',
+		tuesday: 'Вторникам',
+		wednesday: 'Средам',
+		thursday: 'Четвергам',
+		friday: 'Пятницам',
+		saturday: 'Субботам',
+		sunday: 'Воскресеньям',
 	},
 
 	months: {
@@ -127,5 +129,20 @@ module.exports = {
 		october: 'October',
 		november: 'November',
 		december: 'December',
+	},
+
+	translateMonths: {
+		january: 'Января',
+		february: 'Февраля',
+		march: 'Марта',
+		april: 'Апреля',
+		may: 'Мая',
+		june: 'Июня',
+		july: 'Июля',
+		august: 'Августа',
+		september: 'Сентября',
+		october: 'Октября',
+		november: 'Ноября',
+		december: 'Декабря',
 	},
 };

@@ -118,7 +118,7 @@ module.exports = {
 			interaction.channelId,
 			interaction.guildId,
 		);
-		console.log(task.checkDateInMonth()); // test
+
 		if (task.checkDateInMonth()) {
 			const channel = client.channels.cache.get(interaction.channelId);
 			task.start();
