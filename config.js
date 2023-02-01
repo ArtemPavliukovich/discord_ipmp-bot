@@ -64,9 +64,9 @@ module.exports = {
 			name: 'remove',
 			description: 'Отменить встречу',
 			options: {
-				name: {
-					name: 'name',
-					description: 'Введите название отменяемой встречи',
+				id: {
+					name: 'id',
+					description: 'Введите ID отменяемой встречи',
 				},
 			},
 		},
@@ -82,6 +82,7 @@ module.exports = {
 		hello: (username) => `Привет ${username}, меня зовут SKM-Bot, рад знакомству!`,
 		congratTeam: (idRole) => `Команду <@&${idRole}> 🙂 поздравляю с пополнением!`,
 		addUser: (userId) => `<@${userId}> приветствую! У нас тут песочница, но всё по-взрослому, вливайся!`,
+		infoAboutTask: (name, date, taskId) => `${name}, ${date}, ID: ${taskId}`,
 		userMessage: (userId, nameMeet, time) =>
 			`Привет <@${userId}>, напоминаю, у тебя запланирована встреча "${nameMeet}" в ${time}, не опаздывай!`,
 		channelMessage: (name, users, roles, time) => {

@@ -99,28 +99,22 @@ module.exports = {
 		),
 	async execute(interaction) {
 		let responseMessage;
-		const name = interaction.options.getString(commands.addScheduleMeet.options.name.name);
-		const users = interaction.options.getString(commands.addScheduleMeet.options.users.name);
-		const month = interaction.options.getString(commands.addScheduleMeet.options.month.name);
-		const day = interaction.options.getString(commands.addScheduleMeet.options.day.name);
-		const date = interaction.options.getInteger(commands.addScheduleMeet.options.date.name);
-		const hour = interaction.options.getInteger(commands.addScheduleMeet.options.hour.name);
-		const minute = interaction.options.getInteger(commands.addScheduleMeet.options.minute.name);
 
 		const task = new Task(
-			name,
-			month,
-			day,
-			date,
-			hour,
-			minute,
-			users,
+			interaction.options.getString(commands.addScheduleMeet.options.name.name),
+			interaction.options.getString(commands.addScheduleMeet.options.month.name),
+			interaction.options.getString(commands.addScheduleMeet.options.day.name),
+			interaction.options.getInteger(commands.addScheduleMeet.options.date.name),
+			interaction.options.getInteger(commands.addScheduleMeet.options.hour.name),
+			interaction.options.getInteger(commands.addScheduleMeet.options.minute.name),
+			interaction.options.getString(commands.addScheduleMeet.options.users.name),
 			interaction.channelId,
 			interaction.guildId,
 		);
 
 		if (task.checkDateInMonth()) {
 			const channel = client.channels.cache.get(interaction.channelId);
+			// добавление в бд
 			task.start();
 			tasks.set(task.id, task);
 			channel.send(messages.plannedMeet(

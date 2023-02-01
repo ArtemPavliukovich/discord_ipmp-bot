@@ -7,27 +7,26 @@ module.exports = {
 		.setName(commands.removeScheduleMeet.name)
 		.setDescription(commands.removeScheduleMeet.description)
 		.addStringOption(option =>
-			option.setName(commands.removeScheduleMeet.options.name.name)
-				.setDescription(commands.removeScheduleMeet.options.name.description)
-				.setRequired(true)
-				.setMinLength(2)
-				.setMaxLength(20),
+			option.setName(commands.removeScheduleMeet.options.id.name)
+				.setDescription(commands.removeScheduleMeet.options.id.description)
+				.setRequired(true),
 		),
 	async execute(interaction) {
-		const name = interaction.options.getString(commands.removeScheduleMeet.options.name.name);
-		let response = '';
+		let responseMessage = '';
+		const id = interaction.options.getString(commands.removeScheduleMeet.options.id.name).trim();
 
-		if (tasks.has(name)) {
-			const task = tasks.get(name);
+		if (tasks.has(id)) {
+			const task = tasks.get(id);
 			task.stop();
-			tasks.delete(name);
-			response = messages.removeSchedule;
+			// удаление из бд
+			tasks.delete(id);
+			responseMessage = messages.removeSchedule;
 		} else {
-			response = messages.notExistMeet;
+			responseMessage = messages.notExistMeet;
 		}
 
 		await interaction.reply({
-			content: response,
+			content: responseMessage,
 			ephemeral: true,
 		});
 	},

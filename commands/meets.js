@@ -10,8 +10,9 @@ module.exports = {
 		let response = '';
 
 		if (tasks.size) {
-			for (let name of tasks.keys()) {
-				response += `${name} `;
+			for (let id of tasks.keys()) {
+				const task = tasks.get(id);
+				response += messages.infoAboutTask(task.name, task.getStringDate(), id) + '\n';
 			}
 		} else {
 			response = messages.notMeets;

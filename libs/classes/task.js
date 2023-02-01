@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const cron = require('node-cron');
 const { client } = require('../../index');
+const { tasks } = require('../../tasks');
 const {
 	timeZone,
 	minutesForWarnAboutMeet,
@@ -14,10 +15,10 @@ module.exports = class Task {
 		this.id = uuidv4();
 		this.name = name.trim();
 		this.month = month?.trim() || null;
-		this.date = +`${date}`?.trim() || null;
 		this.day = day?.trim() || null;
-		this.hour = +`${hour}`.trim(); // 01?
-		this.minute = +`${minute}`.trim(); // 02?
+		this.date = +`${date}`?.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('') || null;
+		this.hour = +`${hour}`.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('');
+		this.minute = +`${minute}`.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('');
 		this.users = users.match(/<@\d+>/g);
 		this.roles = users.match(/<@&\d+>|@here|@everyone/g);
 		this.channelId = channelId;
@@ -93,6 +94,7 @@ module.exports = class Task {
 	stop() {
 		if (this.task) {
 			this.task.stop();
+			tasks.delete(this.id);
 			return true;
 		}
 	}
