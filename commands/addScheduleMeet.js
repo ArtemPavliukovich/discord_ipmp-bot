@@ -1,7 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { v4: uuidv4 } = require('uuid');
 const { commands, messages, months, days } = require('../config.js');
 const { client } = require('../index');
-const { tasks } = require('../tasks');
+const { database } = require('../libs/classes/database');
 const Task = require('../libs/classes/task');
 
 module.exports = {
@@ -101,6 +102,7 @@ module.exports = {
 		let responseMessage;
 
 		const task = new Task(
+			uuidv4(),
 			interaction.options.getString(commands.addScheduleMeet.options.name.name),
 			interaction.options.getString(commands.addScheduleMeet.options.month.name),
 			interaction.options.getString(commands.addScheduleMeet.options.day.name),
@@ -110,23 +112,25 @@ module.exports = {
 			interaction.options.getString(commands.addScheduleMeet.options.users.name),
 			interaction.channelId,
 			interaction.guildId,
+			new Date().getFullYear(),
 		);
 
-		if (task.checkDateInMonth()) {
-			const channel = client.channels.cache.get(interaction.channelId);
-			// добавление в бд
-			task.start();
-			tasks.set(task.id, task);
-			channel.send(messages.plannedMeet(
-				interaction.user.id,
-				task.name,
-				task.users,
-				task.roles,
-				task.getStringDate(),
-			));
-			responseMessage = messages.addSchedule;
+		if (task.checkTimeForStartTask()) {
+			if (task.checkDateInMonth()) {
+				const isDone = await database.addTask(task);
+
+				if (isDone) {
+					const channel = client.channels.cache.get(task.channelId);
+					channel.send(messages.plannedMeet(interaction.user.id, task.name, task.users, task.getStringDate()));
+					responseMessage = messages.addSchedule;
+				} else {
+					responseMessage = messages.errorAdd;
+				}
+			} else {
+				responseMessage = messages.notDate;
+			}
 		} else {
-			responseMessage = messages.notDate;
+			responseMessage = messages.errorOnceMeet;
 		}
 
 		await interaction.reply({

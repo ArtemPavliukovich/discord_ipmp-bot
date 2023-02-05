@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { commands, messages } = require('../config.js');
-const { tasks } = require('../tasks');
+const { database } = require('../libs/classes/database');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -8,13 +8,20 @@ module.exports = {
 		.setDescription(commands.meets.description),
 	async execute(interaction) {
 		let response = '';
+		const tasks = database.getTasks();
 
 		if (tasks.size) {
-			for (let id of tasks.keys()) {
-				const task = tasks.get(id);
-				response += messages.infoAboutTask(task.name, task.getStringDate(), id) + '\n';
+			for (let task of tasks.values()) {
+				if (!task.task) {
+					await database.removeTask(task.id);
+					continue;
+				}
+
+				response += messages.infoAboutTask(task.name, task.getStringDate(), task.id) + '\n';
 			}
-		} else {
+		}
+
+		if (!response) {
 			response = messages.notMeets;
 		}
 

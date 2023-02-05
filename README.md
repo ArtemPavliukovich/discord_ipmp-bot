@@ -1,1 +1,1 @@
-# Discord bot for IPM platform
+# Discord bot for "SKILL-MATRIX" project

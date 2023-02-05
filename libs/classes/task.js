@@ -1,9 +1,7 @@
-const { v4: uuidv4 } = require('uuid');
-const cron = require('node-cron');
+const Cron = require('croner');
 const { client } = require('../../index');
-const { tasks } = require('../../tasks');
 const {
-	timeZone,
+	timezone,
 	minutesForWarnAboutMeet,
 	translateDays,
 	messages,
@@ -11,104 +9,90 @@ const {
 } = require('../../config');
 
 module.exports = class Task {
-	constructor(name, month, day, date, hour, minute, users, channelId, guildId) {
-		this.id = uuidv4();
+	constructor(id, name, month, day, date, hour, minute, users, channelId, guildId, year) {
+		this.id = id;
 		this.name = name.trim();
 		this.month = month?.trim() || null;
 		this.day = day?.trim() || null;
 		this.date = +`${date}`?.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('') || null;
 		this.hour = +`${hour}`.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('');
 		this.minute = +`${minute}`.trim().split('').map((el, i) => el === '0' && !i ? '' : el).join('');
-		this.users = users.match(/<@\d+>/g);
-		this.roles = users.match(/<@&\d+>|@here|@everyone/g);
+		this.users = typeof users === 'string' ? users.match(/<@&\d+>|@here|@everyone|<@\d+>/g) : users;
 		this.channelId = channelId;
 		this.guildId = guildId;
+		this.year = year;
 		this.task = null;
 	}
 
 	start() {
 		const time = this.getTimeForStartTask();
-		this.task = cron.schedule(time, () => {
-			let usersIds;
-			const channel = client.channels.cache.get(this.channelId);
-			const guild = client.guilds.cache.get(this.guildId);
 
-			if (this.roles && (this.roles.includes('@here') || this.roles.includes('@everyone'))) {
-				const roleHere = this.roles.includes('@here') ? '@here' : null;
-				const roleEveryone = this.roles.includes('@everyone') ? '@everyone' : null;
-				const roleName = roleHere || roleEveryone;
-				// test
-				usersIds = new Set(guild.members.cache.filter(member => {
-					return member.roles.cache.some(role => {
-						return role.name === roleName && !role.name.includes('Bot');
-					});
-				}).map(member => member.user.id));
-			} else {
-				let result = [];
+		if (time) {
+			this.task = Cron(time, {timezone, legacyMode: false}, async () => {
+					let usersIds = [];
+					const users = this.users.join('').match(/<@\d+>/g);
+					const roles = this.users.join('').match(/<@&\d+>|@here|@everyone/g);
+					const channel = client.channels.cache.get(this.channelId);
+					const guild = client.guilds.cache.get(this.guildId);
+					const allMembers = await guild.members.fetch();
 
-				if (this.users) {
-					const givenUsersIds = this.users.join('').match(/\d+/g);
-					result = result.concat(givenUsersIds);
-				}
+					if (roles && (roles.includes('@here') || roles.includes('@everyone'))) {
+						for (let member of allMembers.values()) {
+							if (!member.user.bot) {
+								usersIds.push(member.user.id);
+							}
+						}
+					} else {
+						if (users) {
+							const givenUsersIds = users.join('').match(/\d+/g);
+							usersIds = usersIds.concat(givenUsersIds);
+						}
 
-				if (this.roles) {
-					// test 2 roles
-					const givenRolesIds = this.roles.join('').match(/\d+/g);
-					const givenUsersIds = guild.members.cache.filter(member => {
-						return member.roles.cache.some(role => {
-							return givenRolesIds.includes(`${role.id}`) && !role.name.includes('Bot');
-						});
-					}).map(member => member.user.id);
-					result = result.concat(givenUsersIds);
-				}
+						if (roles) {
+							const filteredUsersIds = [];
+							const givenRolesIds = roles.join('').match(/\d+/g);
 
-				usersIds = new Set(result);
-			}
-			console.log(usersIds); //
-			for (let userId of usersIds) {
-				client.users.send(
-					userId,
-					messages.userMessage(userId, this.name, this.getStringTime()),
-				);
-			}
+							for (let member of allMembers.values()) {
+								if (!member.user.bot) {
+									const isUserHaveRole = member.roles.cache.some(role => givenRolesIds.includes(`${role.id}`));
 
-			channel.send(messages.channelMessage(
-				this.name,
-				this.users,
-				this.roles,
-				this.getStringTime(),
-			));
+									if (isUserHaveRole) {
+										filteredUsersIds.push(member.user.id);
+									}
+								}
+							}
 
-			if (this.month) {
-				setTimeout(() => this.stop(), 0);
-			}
-		}, {
-			scheduled: false,
-			timezone: timeZone,
-		});
+							usersIds = usersIds.concat(filteredUsersIds);
+						}
+					}
 
-		this.task.start();
+					for (let userId of new Set(usersIds)) {
+						client.users.send(userId, messages.userMessage(userId, this.name, this.getStringTime()));
+					}
+
+					channel.send(messages.channelMessage(this.name, this.users, this.getStringTime()));
+
+					if (this.month) {
+						this.stop();
+					}
+				});
+		} else {
+			this.task = null;
+		}
+
 		return true;
 	}
 
 	stop() {
-		if (this.task) {
-			this.task.stop();
-			tasks.delete(this.id);
-			return true;
-		}
+		this.task?.stop();
+		this.task = null;
 	}
 
 	getStringDate() {
-		let result;
 		const time = this.getStringTime();
-
-		if (this.month) {
-			result = `${this.date} ${translateMonths[this.month]} в ${time} (${timeZone})`;
-		} else {
-			result = `по ${translateDays[this.day]} в ${time} (${timeZone})`;
-		}
-
+		const result = this.month
+			? `${this.date} ${translateMonths[this.month]} в ${time} (${timezone})`
+			: `по ${translateDays[this.day]} в ${time} (${timezone})`;
 		return result;
 	}
 
@@ -120,8 +104,7 @@ module.exports = class Task {
 
 	checkDateInMonth() {
 		if (this.month) {
-			const year = new Date().getFullYear();
-			const date = new Date(`${this.month} ${this.date}, ${year} 12:00:00`);
+			const date = new Date(`${this.month} ${this.date}, ${this.year} 12:00:00`);
 			const options = {month: 'long'};
 			const month = new Intl.DateTimeFormat('en-US', options).format(date).toLowerCase();
 			return this.month === month;
@@ -130,23 +113,31 @@ module.exports = class Task {
 		return true;
 	}
 
-	getTimeForStartTask() {
-		let time;
-		// const currentDate = new Date(); // меньше чем 15 минут до встречи, прошедшая дата
-		const minute = this.minute >= minutesForWarnAboutMeet
-			? this.minute - minutesForWarnAboutMeet
-			: 60 + this.minute - minutesForWarnAboutMeet;
-
-		const hour = this.minute >= minutesForWarnAboutMeet
-			? this.hour
-			: this.hour ? this.hour - 1 : 23;
-
+	checkTimeForStartTask() {
 		if (this.month) {
-			time = `${minute} ${hour} ${this.date} ${this.month} *`;
-		} else {
-			time = `${minute} ${hour} * * ${this.day}`;
+			const date = new Date(`${this.month} ${this.date}, ${this.year} ${this.getStringTime()}:00`);
+			return date.getTime() - Date.now() > minutesForWarnAboutMeet * 60000;
 		}
 
-		return time;
+		return true;
+	}
+
+	// !если бот запускается и есть какие-то встречи в базе меньше 15 минут, не будет напоминания
+	getTimeForStartTask() {
+		if (this.checkTimeForStartTask()) {
+			const minute = this.minute >= minutesForWarnAboutMeet
+				? this.minute - minutesForWarnAboutMeet
+				: 60 + this.minute - minutesForWarnAboutMeet;
+
+			const hour = this.minute >= minutesForWarnAboutMeet
+				? this.hour
+				: this.hour ? this.hour - 1 : 23;
+
+			return this.month
+				? `${minute} ${hour} ${this.date} ${this.month.slice(0, 3).toUpperCase()} *`
+				: `${minute} ${hour} * * ${this.day.slice(0, 3).toUpperCase()}`;
+		}
+
+		return null;
 	}
 };
