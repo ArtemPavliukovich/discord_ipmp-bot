@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { v4: uuidv4 } = require('uuid');
-const { commands, messages, months, days } = require('../config.js');
+const { commands, messages, months, days, channelForMessagesAboutMeeting } = require('../config.js');
 const { client } = require('../index');
 const { database } = require('../libs/classes/database');
 const Task = require('../libs/classes/task');
@@ -110,7 +110,7 @@ module.exports = {
 			interaction.options.getInteger(commands.addScheduleMeet.options.hour.name),
 			interaction.options.getInteger(commands.addScheduleMeet.options.minute.name),
 			interaction.options.getString(commands.addScheduleMeet.options.users.name),
-			interaction.channelId,
+			channelForMessagesAboutMeeting,
 			interaction.guildId,
 			new Date().getFullYear(),
 		);

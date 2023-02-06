@@ -1,7 +1,19 @@
 module.exports = {
-	idGeneralChannel: '1055125402009477154',
+	idGeneralChannel: '1002123388942307394',
 
-	welcomeRoles: ['Front-end'],
+	welcomeRoles: [
+		'Front-end',
+		'Back-end',
+		'QA',
+		'BA',
+		'PM',
+		'Design',
+		'DevOps',
+		'Front-end-reviewer',
+		'Back-end-reviewer',
+	],
+
+	channelForMessagesAboutMeeting: '1011626358729887775',
 
 	minutesForWarnAboutMeet: 15,
 
